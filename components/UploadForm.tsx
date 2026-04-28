@@ -104,7 +104,7 @@ const UploadForm = () => {
 
         {/* Cover Image Upload */}
         <div>
-          <label className="form-label">Cover Image (Optional)</label>
+          <label className="form-label">Cover Image (optional)</label>
           <div className="upload-dropzone">
           <label className="cursor-pointer block h-full">
             <input
