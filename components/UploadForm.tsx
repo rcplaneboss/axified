@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 interface VoiceOption {
   id: string;
@@ -26,6 +27,8 @@ const UploadForm = () => {
   const [selectedVoice, setSelectedVoice] = useState("dave");
   const [isLoading, setIsLoading] = useState(false);
 
+  const {userId} = useAuth();
+
   const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -42,6 +45,10 @@ const UploadForm = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if(!userId){
+      toast.error("You must be logged in to submit a book.");
+      return;
+    }
     e.preventDefault();
     setIsLoading(true);
     
