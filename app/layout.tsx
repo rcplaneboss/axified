@@ -25,6 +25,15 @@ export const metadata: Metadata = {
   description: "Transform your books into interactive AI conversations. Upload PDFs, and chat with your book using voice.",
 };
 
+/**
+ * Application root layout that provides global HTML structure, fonts, and top-level providers.
+ *
+ * Renders the HTML and body elements with configured font CSS variables, wraps page content with
+ * the authentication provider, includes the global navigation bar, and mounts the global toast container.
+ *
+ * @param children - Page content to be rendered inside the layout
+ * @returns The root HTML/Body React element containing providers, navigation, and children
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

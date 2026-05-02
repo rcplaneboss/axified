@@ -16,6 +16,15 @@ declare global {
 
 let cached = global.mongoose || (global.mongoose = { conn: null, promise: null });
 
+/**
+ * Establishes and returns a cached Mongoose connection to the configured MongoDB URI.
+ *
+ * Subsequent calls return the existing cached connection. If a connection attempt fails,
+ * the function clears the in-progress cache and rethrows the original error.
+ *
+ * @returns The active Mongoose connection object
+ * @throws The underlying error thrown while attempting to connect to MongoDB
+ */
 export async function connectToDatabase() {
   if (cached.conn) return cached.conn;
 
