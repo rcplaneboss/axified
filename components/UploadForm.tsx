@@ -52,11 +52,11 @@ const UploadForm = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if(!userId){
       toast.error("You must be logged in to submit a book.");
       return;
     }
-    e.preventDefault();
     setIsLoading(true);
 
     // Posting -> Track Book Uplaods ....
