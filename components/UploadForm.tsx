@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { checkBookExists, createBook, saveBookSegments } from "@/lib/actions/book.actions";
+import { useRouter } from "next/navigation";
+import { parsePDFFile } from "@/lib/utils";
+import { upload } from "@vercel/blob/client";
 
 interface VoiceOption {
   id: string;
@@ -29,6 +34,8 @@ const UploadForm = () => {
 
   const {userId} = useAuth();
 
+  const router = useRouter();
+
   const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -51,17 +58,115 @@ const UploadForm = () => {
     }
     e.preventDefault();
     setIsLoading(true);
+
+    // Posting -> Track Book Uplaods ....
     
-    // Simulate form submission
+   
     try {
-      // Your submission logic here
-      console.log({
-        pdf: pdfFile,
-        cover: coverImage,
-        title,
-        author,
-        voice: selectedVoice,
-      });
+      const existsCheck = await checkBookExists(title);
+
+      if(existsCheck.exists && existsCheck.book){
+        toast.info("Book with the same title already exists.")
+
+        // Reset form
+        setPdfFile(null);
+        setCoverImage(null);
+        setTitle("");
+        setAuthor("");
+        setSelectedVoice("dave");
+        
+        // Redirect to book page using nextjs router
+         router.push(`/books/${existsCheck.book.slug}`);
+         return;         
+        }
+        const fileTitle = title.replace(/\s+/g, "_").toLowerCase();
+
+        const parsedPDF = await  parsePDFFile(pdfFile);
+
+        if(parsedPDF.content.length === 0){
+          toast.error("Failed to parse PDF content. Try again with a different file.");
+          setIsLoading(false);
+          return;
+        }
+
+
+        const uploadedpdfblob = await upload(fileTitle + ".pdf", pdfFile, {
+            access: "public",
+            handleUploadUrl: '/api/upload',
+            contentType: 'application/pdf',     
+        });
+
+
+        let coverUrl: string
+
+        if(coverImage){
+          const coverFile = coverImage;
+          const uploadedCoverBlob = await upload(`${fileTitle}_cover.png`, coverFile, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            contentType: coverFile.type,
+          })
+
+          coverUrl = uploadedCoverBlob.url;
+        }else{
+          const response = await fetch(parsedPDF.cover);
+          const blob = await response.blob();
+
+          const uploadedCoverBlob =  await upload(`${fileTitle}_cover.png`, blob, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+            contentType: 'image/png',
+          })
+           coverUrl = uploadedCoverBlob.url;
+        }
+
+        const book = await createBook({
+          clerkId: userId,
+          title,
+          author,
+          persona: selectedVoice,
+          fileURL: uploadedpdfblob.url,
+          fileBlobKey: uploadedpdfblob.pathname,
+          coverURL: coverUrl,
+          fileSize: pdfFile.size,
+        });
+
+        if(!book.success)
+        {
+          throw new Error("Failed to create book. Please try again.");
+        }
+
+          if(book.alreadyExists){
+        toast.info("Book with the same title already exists.")
+
+        // Reset form
+        setPdfFile(null);
+        setCoverImage(null);
+        setTitle("");
+        setAuthor("");
+        setSelectedVoice("dave");
+        
+        // Redirect to book page using nextjs router
+         router.push(`/books/${existsCheck.book.slug}`);
+         return;         
+        }
+
+        const segments = await saveBookSegments(book.data._id, userId, parsedPDF.content);
+
+        if(!segments.success){
+          toast.info("Failed to save book segments. Please try again.")
+        }
+        setPdfFile(null);
+        setCoverImage(null);
+        setTitle("");
+        setAuthor("");
+        setSelectedVoice("dave");
+
+        router.push('/')
+
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("An error occurred while uploading your book. Please try again.");
     } finally {
       setIsLoading(false);
     }
