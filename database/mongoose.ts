@@ -29,7 +29,12 @@ export async function connectToDatabase() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {bufferCommands: false})
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+      retryWrites: true,
+      retryReads: true,
+      maxPoolSize: 10,
+    })
   }
 
   try {

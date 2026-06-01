@@ -11,6 +11,7 @@ import { upload } from "@vercel/blob/client";
 
 interface VoiceOption {
   id: string;
+
   name: string;
   description: string;
   group: "Male" | "Female";
@@ -89,7 +90,6 @@ const UploadForm = () => {
         return;
       }
 
-
       const uploadedpdfblob = await upload(fileTitle + ".pdf", pdfFile, {
         access: "public",
         handleUploadUrl: '/api/upload',
@@ -128,7 +128,7 @@ const UploadForm = () => {
         fileURL: uploadedpdfblob.url,
         fileBlobKey: uploadedpdfblob.pathname,
         coverURL: coverUrl,
-        fileSize: pdfFile.size,
+        fileSize: pdfFile?.size,
       });
 
       if (!book.success) {

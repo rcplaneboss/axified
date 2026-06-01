@@ -23,7 +23,7 @@ const Hero = () => {
   ];
 
   return (
-    <section className="w-full py-12 pt-28 mb-10 md:mb-16">
+    <section className="w-full mb-10 md:mb-16">
       <div className="wrapper">
         <div className="bg-amber-100 rounded-2xl p-8 md:p-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
