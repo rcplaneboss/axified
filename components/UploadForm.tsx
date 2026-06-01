@@ -80,6 +80,13 @@ const UploadForm = () => {
         router.push(`/books/${existsCheck.book.slug}`);
         return;
       }
+
+      if (!pdfFile) {
+        toast.error("Please select a PDF file.");
+        setIsLoading(false);
+        return;
+      }
+
       const fileTitle = title.replace(/\s+/g, "_").toLowerCase();
 
       const parsedPDF = await parsePDFFile(pdfFile);
