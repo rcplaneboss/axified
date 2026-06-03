@@ -20,9 +20,12 @@ const monaSans = Mona_Sans({
   subsets: ["latin"],
 });
 
+
+
 export const metadata: Metadata = {
   title: "Bookified",
   description: "Transform your books into interactive AI conversations. Upload PDFs, and chat with your book using voice.",
+  
 };
 
 /**
